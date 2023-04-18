@@ -1,12 +1,35 @@
 {
   "name": "breeze-wc",
-  "version": "0.1.0",
-  "description": "",
+  "version": "0.2.0",
+  "description": "Breeze is a framework for working with Web Components. It aims to make the process of crafting Web Components easier, faster and more pleasant. It requires no build step, has no dependency, and is quick to get started with.",
   "type": "module",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
+  "keywords": [
+    "web component",
+    "custom element",
+    "lit",
+    "stencil",
+    "front-end framework",
+    "front-end",
+    "HTML",
+    "react",
+    "angular",
+    "vue"
+  ],
+  "author": {
+    "name": "Zi Han Meng",
+    "email": "zi.han.meng100@gmail.com"
+  },
+  "homepage": "https://github.com/zeemeng/breeze",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zeemeng/breeze.git"
+  },
+  "engines": {
+    "node": ">=13.2.0"
+  },
   "license": "MIT"
 }
