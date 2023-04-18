@@ -64,7 +64,7 @@ export class MyComponent extends Component {
   <p>Good morning!</p>
   `;
 
-  static StyleSheet = `
+  static styleSheet = `
   div {
     color: blue;
   }
@@ -94,7 +94,7 @@ export class MyComponent extends Component {
   <div classs="counter"></div>
   `;
 
-  static StyleSheetPaths = "./a-path/to-a-css-file.css"; // A path or an array of paths to a CSS file relative to the HTML document. These files shall contain rulesets that apply to the shadow DOM tree of the custom element.
+  static styleSheetPaths = "./a-path/to-a-css-file.css"; // A path or an array of paths to a CSS file relative to the HTML document. These files shall contain rulesets that apply to the shadow DOM tree of the custom element.
 
   static init = this.initClass();
 
