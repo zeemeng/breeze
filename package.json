@@ -1,6 +1,6 @@
 {
   "name": "breeze-wc",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Breeze is a framework for working with Web Components. It aims to make the process of crafting Web Components easier, faster and more pleasant. It requires no build step, has no dependency, and is quick to get started with.",
   "type": "module",
   "main": "index.js",

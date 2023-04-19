@@ -91,7 +91,7 @@ export class MyComponent extends Component {
   static template = `
   <div>Hello world!</div>
   <p>Good morning!</p>
-  <div classs="counter"></div>
+  <div class="counter"></div>
   `;
 
   static styleSheetPaths = "./a-path/to-a-css-file.css"; // A path or an array of paths to a CSS file relative to the HTML document. These files shall contain rulesets that apply to the shadow DOM tree of the custom element.
@@ -102,7 +102,7 @@ export class MyComponent extends Component {
 
   // Lifecycle method defined by the "WHATWG HTML Spec".
   connectedCallback() {
-    setInterval(() => this.counterState.mutate(this.counterState.value), 1000); // Increments the state value every 1000ms.
+    setInterval(() => this.counterState.mutate(this.counterState.value + 1), 1000); // Increments the state value every 1000ms.
   }
 
   // Special method invoke on every local state mutation.
