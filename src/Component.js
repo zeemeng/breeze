@@ -72,6 +72,13 @@ class Component extends HTMLElement {
   static attachShadowOptions = { mode: "open" };
 
   /**
+   * A boolean flag controlling whether this component is displayed before or after CSS styles sheets have loaded.
+   *
+   * Defaults to `true`, so as to prevent *flash of unstyled content*.
+   */
+  static displayAfterCssLoaded = true;
+
+  /**
    * Performs initialization work for classes extending the {@link Component} base class.
    * Must be invoked before the child class is instantiated and after required static fields are
    * initialized.
@@ -81,55 +88,41 @@ class Component extends HTMLElement {
    * or as an initializer expression for a static field, such as `static init = this.initClass()`.
    */
   static initClass() {
-    // Insert template content as defined by "static template" into templateElement
+    function insertStyleSheetLinkElement(href, containerNode) {
+      if (typeof href !== "string" || !href.length) return;
+      const linkElement = document.createElement("link");
+      linkElement.setAttribute("rel", "stylesheet");
+      linkElement.setAttribute("href", href);
+      containerNode.appendChild(linkElement);
+    }
+
+    function insertStyleElement(styleSheet, containerNode) {
+      if (typeof styleSheet !== "string" || !styleSheet.length) return;
+      const styleElement = document.createElement("style");
+      styleElement.textContent = styleSheet;
+      containerNode.appendChild(styleElement);
+    }
+
     this.templateElement = document.createElement("template");
     this.templateElement.innerHTML = this.template;
 
     // Append shadow DOM style sheets to `templateElement`
-    if (typeof this.styleSheetPaths === "string" && this.styleSheetPaths.length) {
-      const linkElement = document.createElement("link");
-      linkElement.setAttribute("rel", "stylesheet");
-      linkElement.setAttribute("href", this.styleSheetPaths);
-      this.templateElement.content.prepend(linkElement);
-    }
-
+    const container = document.createElement("div");
     if (Array.isArray(this.styleSheetPaths))
-      this.styleSheetPaths.reduceRight((accum, styleSheet) => {
-        if (!styleSheet.length) return;
-        const linkElement = document.createElement("link");
-        linkElement.setAttribute("rel", "stylesheet");
-        linkElement.setAttribute("href", styleSheet);
-        this.templateElement.content.prepend(linkElement);
-      }, null);
-
-    if (typeof this.styleSheet === "string" && this.styleSheet.length) {
-      const styleElement = document.createElement("style");
-      styleElement.textContent = this.styleSheet;
-      this.templateElement.content.prepend(styleElement);
-    }
+      this.styleSheetPaths.forEach(styleSheet =>
+        insertStyleSheetLinkElement(styleSheet, container)
+      );
+    else insertStyleSheetLinkElement(this.styleSheetPaths, container);
+    insertStyleElement(this.styleSheet, container);
+    this.templateElement.content.prepend(...container.children);
 
     // Append light DOM style sheets to document head
-    if (typeof this.lightDOMStyleSheetPaths === "string" && this.lightDOMStyleSheetPaths.length) {
-      const linkElement = document.createElement("link");
-      linkElement.setAttribute("rel", "stylesheet");
-      linkElement.setAttribute("href", this.lightDOMStyleSheetPaths);
-      document.head.append(linkElement);
-    }
-
     if (Array.isArray(this.lightDOMStyleSheetPaths))
-      this.lightDOMStyleSheetPaths.reduce((accum, styleSheet) => {
-        if (!styleSheet.length) return;
-        const linkElement = document.createElement("link");
-        linkElement.setAttribute("rel", "stylesheet");
-        linkElement.setAttribute("href", styleSheet);
-        document.head.append(linkElement);
-      }, null);
-
-    if (typeof this.lightDOMStyleSheet === "string" && this.lightDOMStyleSheet.length) {
-      const styleElement = document.createElement("style");
-      styleElement.textContent = this.lightDOMStyleSheet;
-      document.head.append(styleElement);
-    }
+      this.lightDOMStyleSheetPaths.forEach(styleSheet =>
+        insertStyleSheetLinkElement(styleSheet, document.head)
+      );
+    else insertStyleSheetLinkElement(this.lightDOMStyleSheetPaths, document.head);
+    insertStyleElement(this.lightDOMStyleSheet, document.head);
 
     // Define this custom element in the `CustomElementRegistry`
     customElements.define(this.tagName, this);
@@ -158,6 +151,25 @@ class Component extends HTMLElement {
     super();
     this.attachShadow(this.constructor.attachShadowOptions);
     this.shadowRoot.append(this.constructor.templateElement.content.cloneNode(true));
+
+    if (this.constructor.displayAfterCssLoaded) {
+      const preventDisplayStyleElement = document.createElement("style");
+      preventDisplayStyleElement.textContent = ":host { display: none !important; }";
+      this.shadowRoot.prepend(preventDisplayStyleElement);
+
+      const promises = [];
+      this.shadowRoot.querySelectorAll('link[rel="stylesheet"]').forEach(linkElement =>
+        promises.push(
+          new Promise(resolve => {
+            linkElement.onload = resolve;
+            linkElement.onerror = resolve;
+          })
+        )
+      );
+      Promise.allSettled(promises).finally(() =>
+        this.shadowRoot.removeChild(preventDisplayStyleElement)
+      );
+    }
   }
 
   /**
